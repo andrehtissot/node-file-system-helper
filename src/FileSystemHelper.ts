@@ -37,7 +37,7 @@ export class FileSystemHelper {
         fs.mkdirSync(this.resolvePath(dirPath), { recursive: true })
     }
 
-    public async writeFile(filePath: string, data: string, options = {}): Promise<void> {
+    public async writeFile(filePath: string, data: string | Buffer, options = {}): Promise<void> {
         return new Promise((resolve, reject) => {
             fs.writeFile(this.resolvePath(filePath), data, options, (err) => {
                 if (err) {
@@ -49,7 +49,7 @@ export class FileSystemHelper {
         })
     }
 
-    public writeFileSync(filePath: string, data: string, options = {}) {
+    public writeFileSync(filePath: string, data: string | Buffer, options = {}) {
         return fs.writeFileSync(this.resolvePath(filePath), data, options)
     }
 
@@ -110,12 +110,20 @@ export class FileSystemHelper {
         }
     }
 
-    public fileStatsSync(filePath: string): fs.Stats | null {
-        try {
-            return fs.statSync(this.resolvePath(filePath))
-        } catch (err) {
-            return null
-        }
+    public async fileStats(filePath: string): Promise<fs.Stats> {
+        return new Promise((resolve, reject) => {
+            fs.stat(this.resolvePath(filePath), (error, stats) => {
+                if (error) {
+                    reject(error)
+                } else {
+                    resolve(stats)
+                }
+            })
+        })
+    }
+
+    public fileStatsSync(filePath: string): fs.Stats {
+        return fs.statSync(this.resolvePath(filePath))
     }
 
     public async dirExists(dirPath: string): Promise<boolean> {
